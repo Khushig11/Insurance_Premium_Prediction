@@ -1,39 +1,28 @@
-from flask import Flask,request,render_template,app,jasonify,url_for
+from flask import Flask,request,render_template,app,url_for
 import pandas as pd
 import numpy as np
 import pickle
-
+ 
 app= Flask(__name__)
 
-
-file= open('gradient_boosting_model.pkl','rb')
-model = pickle.load(file)
-
-data= pd.read_csv('./insurance.csv')
-data.head()
-
+model = pickle.load(open('gradient_boosting_model.pkl','rb'))
+scale = pickle.load(open('scaling.pkl','rb'))
+data= pd.read_csv('insurance.csv')
 
 @app.route('/')
 def index():
-    sex = sorted(data['sex'].unique())
-    smoker = sorted(data['smoker'].unique())
-    region = sorted(data['region'].unique())
-    return render_template('index.html',sex=sex, smoker=smoker, region=region)
+    return render_template('index.html')
 
-
-@app.route('/predict'methods=['POST'])
+@app.route('/predict',methods=['POST'])
 def predict():
-    age = int(request.form.get('age'))
-    sex = request.form.get('sex')
-    bmi = float(request.form.get('bmi'))
-    children = int(request.form.get('children'))
-    smoker = request.form.get('smoker')
-    region = request.form.get('region')
-
-    prediction = model.predict(pd.DataFrame([[age, sex, bmi, children, smoker, region]], 
-                columns=['age', 'sex', 'bmi', 'children', 'smoker', 'region']))
-    return str(prediction[0])
-
+    age = float(request.form["age"])
+    bmi = float(request.form["bmi"])
+    smoker = int(request.form.get("smoker",0))
+    data=[age, bmi, smoker]
+    print(data)
+    final_input = scale.transform(np.array(data).reshape(1,-1))
+    output=model.predict(final_input)
+    return render_template("index.html",prediction_text="The Insurance Premium Prediction is {}".format(output[0]))
 
 if __name__ == '__main__':
     app.run(debug=True)
