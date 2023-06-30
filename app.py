@@ -7,7 +7,7 @@ app= Flask(__name__)
 
 model = pickle.load(open('gradient_boosting_model.pkl','rb'))
 scale = pickle.load(open('scaling.pkl','rb'))
-data= pd.read_csv('insurance.csv')
+
 
 @app.route('/')
 def index():
