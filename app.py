@@ -21,7 +21,7 @@ def predict():
     data=[age, bmi, smoker]
     print(data)
     final_input = scale.transform(np.array(data).reshape(1,-1))
-    output=model.predict(final_input)
+    output = model.predict(final_input)
     return render_template("index.html",prediction_text="The Insurance Premium Prediction is {}".format(output[0]))
 
 if __name__ == '__main__':
